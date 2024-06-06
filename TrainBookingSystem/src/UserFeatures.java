@@ -36,7 +36,7 @@ public class UserFeatures {
 
     private void startMenu(String username) {
         System.out.println("-----------Welcome to User Page--------------\n");
-        System.out.println(" 1. Booking \n 2. Get PNR status \n 3. Booked Tickets \n 4. Cancel Ticket  \n 5. List train  \n 6. Search Train \n 7. Exit");
+        System.out.println(" 1. Booking \n 2. Get PNR status \n 3. Booked Tickets \n 4. Cancel Ticket  \n 5. List train routes  \n 6. Search Train \n 7. Exit");
         System.out.println("Enter your choice");
         int choice = sc.nextInt();
         sc.nextLine();
@@ -76,19 +76,15 @@ public class UserFeatures {
     }
 
     private void signUp() {
-        User user = new User();
         System.out.println("Enter your username");
         String username = sc.nextLine();
-        user.setName(username);
         System.out.println("Enter your password");
         String password = sc.nextLine();
-        user.setPassword(password);
         System.out.println("Enter your Phone Number");
         String phoneNumber = sc.nextLine();
-        user.setPhoneNumber(phoneNumber);
         System.out.println("Enter your email");
         String email = sc.nextLine();
-        user.setEmail(email);
+        User user=new User(username,phoneNumber,email,password);
         Credential credential = new Credential();
         credential.setEmail(email);
         credential.setPassword(password);
@@ -98,6 +94,7 @@ public class UserFeatures {
     }
 
     public void createCredentials(Credential credentials) {
+//    	System.out.println(credentials.toString());
         DataBase.getInstance().insertCredentials(credentials);
     }
 
@@ -146,7 +143,14 @@ public class UserFeatures {
     }
 
     public Ticket cancelTicket(User u, int pnr) {
-        List<Ticket> tickets = u.getTickets();
+        
+    	List<Ticket> tickets=DataBase.getInstance().getTickets();
+    	List<Integer> ts=u.getTickets();
+    	for(Integer i:ts) {
+    		if(i==pnr) {
+    			ts.remove(i);
+    		}
+    	}
         if (!tickets.isEmpty()) {
             for (Ticket ticket : tickets) {
                 if (ticket.getPnr() == pnr) {
@@ -244,17 +248,28 @@ public class UserFeatures {
             System.out.println("Train not found");
         }
     }
+    
+    private Ticket getUserTickets(int ticketnum) {
+    	 List<Ticket> tickets = DataBase.getInstance().getTickets();
+    	 for(Ticket t:tickets) {
+    		 if(t.getPnr()==ticketnum) {
+    			 return t;
+    		 }
+    	 }
+    	return null;
+    }
 
 
     private void getPnrStatus(String email) {
         User user = getUser(email);
         if (user != null) {
-            List<Ticket> tickets = user.getTickets();
-            if (!tickets.isEmpty()) {
+            List<Integer> ts=user.getTickets();
+            if (!ts.isEmpty()) {
                 System.out.println("----------Ticket Details----------");
-                for (Ticket t : tickets) {
-                    System.out.println("Ticket Number - " + t.getPnr());
-                    System.out.println("Status of the Ticket - " + t.getStatus());
+                for (Integer i : ts) {
+                	Ticket ticket=getUserTickets(i);
+                    System.out.println("Ticket Number - " + ticket.getPnr());
+                    System.out.println("Status of the Ticket - " + ticket.getStatus());
                 }
             } else {
                 System.out.println("you haven't book Any Train yet");
@@ -289,10 +304,11 @@ public class UserFeatures {
                 if (choice.equals("y")) {
                     Ticket ticket = new Ticket(t, passenger);
                     ticket.setStatus("CF");
-                    user.setTickets(ticket);
+                    user.setTickets(ticket.getPnr());
                     t.setNumberofseats(t.getNumberofseats() - 1);
                     System.out.println("Train Details");
                     System.out.println(t.toString());
+//                    System.out.println(ticket.toString());
                     DataBase.getInstance().storeTickets(ticket);
                     System.out.println("Train Booked Successfully");
                 }
@@ -304,15 +320,17 @@ public class UserFeatures {
                 if (choice.equals("y")) {
                     Ticket ticket = new Ticket(t, passenger);
                     ticket.setStatus("WL");
-                    user.setTickets(ticket);
+                    user.setTickets(ticket.getPnr());
                     DataBase.getInstance().storeWaitingList(ticket);
                     System.out.println("---------Train Details----------");
                     System.out.println(t.toString());
+//                    System.out.println(ticket.toString());
                     DataBase.getInstance().storeTickets(ticket);
                     System.out.println("Train Booked Successfully,Currently you are in Waiting List");
                 }
             }
             DataBase.getInstance().storePassenger(passenger);
+//            System.out.println(passenger.toString());
         }
     }
 
@@ -338,8 +356,6 @@ public class UserFeatures {
             Passenger p = ticket.getPassenger();
             List<Passenger> passengers = DataBase.getInstance().getPassengers();
             passengers.remove(p);
-            List<Ticket> tickets = u.getTickets();
-            tickets.remove(ticket);
             System.out.println("Your Ticket Number " + ticket.getPnr() + " And The Ticket has been Cancelled Successfully");
         } else {
             System.out.println("Ticket not found");
@@ -349,9 +365,10 @@ public class UserFeatures {
     private void viewBookedTickets(String email) {
         User user = getUser(email);
         System.out.println("-------Ticket Details--------");
-        List<Ticket> tickets = user.getTickets();
-        if (!tickets.isEmpty()) {
-            for (Ticket t : tickets) {
+        List<Integer> ts = user.getTickets();
+        if (!ts.isEmpty()) {
+        	for(Integer i:ts) {
+        		Ticket t=getUserTickets(i);
                 Train train = t.getTrain();
                 System.out.println("Ticket Number - " + t.getPnr());
                 System.out.println("--------Train Details--------");
