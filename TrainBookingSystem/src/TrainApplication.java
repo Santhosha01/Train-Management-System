@@ -4,7 +4,8 @@ public class TrainApplication {
     static Scanner sc = new Scanner(System.in);
 
     public static void main(String[] args) {
-        start();
+    	DataBase.getInstance().readData();
+    	start();
     }
 
     public static void start() {
@@ -22,7 +23,8 @@ public class TrainApplication {
                 user.init();
                 break;
             case 3:
-                System.out.println("Thank for using IRTCT Application");
+            	 DataBase.getInstance().writeData();
+            	System.out.println("Thank for using IRTCT Application");
                 System.exit(0);
             default:
                 System.out.println("Invalid Input");
