@@ -8,7 +8,7 @@ public class User {
     private String email;
     private String password;
 
-    private List<Ticket> tickets = new ArrayList<>();
+    private List<Integer> tickets = new ArrayList<>();
 
     public int getId() {
         return id;
@@ -17,15 +17,15 @@ public class User {
     public User() {
         id = ++id;
     }
-
-    public List<Ticket> getTickets() {
+    public List<Integer> getTickets() {
         return tickets;
     }
 
-    public void setTickets(Ticket ticket) {
+    public void setTickets(int ticket) {
         tickets.add(ticket);
     }
 
+   
     public String getName() {
         return name;
     }
